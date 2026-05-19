@@ -10,6 +10,9 @@ const { generalLimiter } = require('./middleware/rateLimiter');
 const app = express();
 const server = http.createServer(app);
 
+// Trust proxy — required for Render, Heroku, and other reverse proxy platforms
+app.set('trust proxy', 1);
+
 // Socket.io for live results
 const io = new Server(server, {
   cors: { origin: process.env.CLIENT_URL, methods: ['GET', 'POST'] },
@@ -44,11 +47,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: 'Internal server error' });
 });
 
-// Socket.io connection
 io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
   socket.on('join-election', (electionId) => socket.join(`election-${electionId}`));
-  socket.on('disconnect', () => console.log('Client disconnected:', socket.id));
 });
 
 const PORT = process.env.PORT || 5000;

@@ -17,10 +17,11 @@ const sendOTP = async (email, otp, fullName) => {
     return;
   }
 
+  // port 465 with SSL — more reliable on cloud platforms than 587
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
-    port: Number(process.env.EMAIL_PORT),
-    secure: false,
+    port: 465,
+    secure: true, // SSL
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
@@ -65,7 +66,12 @@ exports.register = async (req, res) => {
     const user = new User({ fullName, email, phone, nin, voterCardNumber, password, state, lga, otp, otpExpiry, isVerified: false });
     await user.save();
 
-    await sendOTP(email, otp, fullName);
+    try {
+      await sendOTP(email, otp, fullName);
+    } catch (emailError) {
+      console.error('Email error:', emailError.message);
+      // Don't fail registration if email fails — user can resend OTP
+    }
 
     await AuditLog.create({
       action: 'VOTER_REGISTERED',
@@ -78,7 +84,7 @@ exports.register = async (req, res) => {
       success: true,
       message: process.env.NODE_ENV !== 'production'
         ? 'Registered! Check your SERVER TERMINAL for the OTP code.'
-        : 'Registration successful! Check your email for the OTP.',
+        : 'Registration successful! Check your email for the OTP code.',
       userId: user._id,
     });
   } catch (error) {
@@ -133,7 +139,12 @@ exports.resendOTP = async (req, res) => {
     user.otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
     await user.save();
 
-    await sendOTP(user.email, otp, user.fullName);
+    try {
+      await sendOTP(user.email, otp, user.fullName);
+    } catch (emailError) {
+      console.error('Email error:', emailError.message);
+    }
+
     res.json({
       success: true,
       message: process.env.NODE_ENV !== 'production'

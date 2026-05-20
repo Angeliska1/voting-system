@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const { Resend } = require('resend');
 const User = require('../models/User');
 const AuditLog = require('../models/AuditLog');
 
@@ -17,24 +16,43 @@ const sendOTP = async (email, otp, fullName) => {
     return;
   }
 
-  const resend = new Resend(process.env.RESEND_API_KEY);
-
-  await resend.emails.send({
-    from: 'VoteNG <onboarding@resend.dev>',
-    to: email,
-    subject: 'Your VoteNG Verification Code',
-    html: `
-      <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:24px;border:1px solid #eee;border-radius:8px;">
-        <h2 style="color:#00563B;">VoteNG — Verification Code</h2>
-        <p>Hello <strong>${fullName}</strong>,</p>
-        <p>Your one-time verification code is:</p>
-        <div style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#00563B;text-align:center;padding:16px;background:#f0f7f4;border-radius:6px;">
-          ${otp}
+  // Use Brevo HTTP API — bypasses Render's SMTP port blocking
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'api-key': process.env.BREVO_API_KEY,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      sender: {
+        name: 'VoteNG System',
+        email: process.env.EMAIL_USER, // your verified Gmail in Brevo
+      },
+      to: [{ email }],
+      subject: 'Your VoteNG Verification Code',
+      htmlContent: `
+        <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:24px;border:1px solid #eee;border-radius:8px;">
+          <h2 style="color:#00563B;">VoteNG — Verification Code</h2>
+          <p>Hello <strong>${fullName}</strong>,</p>
+          <p>Your one-time verification code is:</p>
+          <div style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#00563B;text-align:center;padding:16px;background:#f0f7f4;border-radius:6px;">
+            ${otp}
+          </div>
+          <p style="color:#666;font-size:13px;">This code expires in 10 minutes. Do not share it with anyone.</p>
         </div>
-        <p style="color:#666;font-size:13px;">This code expires in 10 minutes. Do not share it with anyone.</p>
-      </div>
-    `,
+      `,
+    }),
   });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    console.error('Brevo API error:', data);
+    throw new Error('Failed to send OTP email');
+  }
+
+  console.log('OTP email sent successfully:', data.messageId);
 };
 
 // @route POST /api/auth/register
@@ -60,7 +78,7 @@ exports.register = async (req, res) => {
     try {
       await sendOTP(email, otp, fullName);
     } catch (emailError) {
-      console.error('Email error:', emailError);
+      console.error('Email error:', emailError.message);
     }
 
     await AuditLog.create({

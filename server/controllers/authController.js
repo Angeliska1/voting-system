@@ -60,7 +60,7 @@ exports.register = async (req, res) => {
     try {
       await sendOTP(email, otp, fullName);
     } catch (emailError) {
-      console.error('Email error:', emailError.message);
+      console.error('Email error:', emailError);
     }
 
     await AuditLog.create({

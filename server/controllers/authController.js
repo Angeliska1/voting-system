@@ -17,11 +17,11 @@ const sendOTP = async (email, otp, fullName) => {
     return;
   }
 
-  // port 465 with SSL — more reliable on cloud platforms than 587
+  // Use port 465 with SSL — more reliable on cloud platforms than 587
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
-    port: 465,
-    secure: false, // SSL
+    port: Number(process.env.EMAIL_PORT) || 587,
+    secure: false,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,

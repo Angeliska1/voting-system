@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const User = require('../models/User');
 const AuditLog = require('../models/AuditLog');
 
@@ -17,19 +17,10 @@ const sendOTP = async (email, otp, fullName) => {
     return;
   }
 
-  // Use port 465 with SSL — more reliable on cloud platforms than 587
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: Number(process.env.EMAIL_PORT) || 587,
-    secure: false,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+  const resend = new Resend(process.env.RESEND_API_KEY);
 
-  await transporter.sendMail({
-    from: `"VoteNG System" <${process.env.EMAIL_USER}>`,
+  await resend.emails.send({
+    from: 'VoteNG <onboarding@resend.dev>',
     to: email,
     subject: 'Your VoteNG Verification Code',
     html: `
@@ -70,7 +61,6 @@ exports.register = async (req, res) => {
       await sendOTP(email, otp, fullName);
     } catch (emailError) {
       console.error('Email error:', emailError.message);
-      // Don't fail registration if email fails — user can resend OTP
     }
 
     await AuditLog.create({

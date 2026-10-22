@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
       const { data } = await api.get('/auth/me')
       setUser(data.user)
       localStorage.setItem('voteNgUser', JSON.stringify(data.user))
-    } catch (_) {}
+    } catch (){}
   }
 
   return (

@@ -38,6 +38,10 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 // Health check
 app.get('/api/health', (req, res) => res.json({ success: true, message: 'VoteNG API is running' }));
 
+app.get("/", (req, res) => {
+  res.json({ message: "VoteNG API is running" });
+});
+
 // 404 handler
 app.use((req, res) => res.status(404).json({ success: false, message: 'Route not found' }));
 

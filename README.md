@@ -1,61 +1,69 @@
-# VoteNG
+# VoteNG - Digital Voting Platform
 
-VoteNG is a digital voting platform for secure elections, voter verification, and transparent result tracking. It uses a React frontend, Express backend, and MongoDB database.
+VoteNG is a full-stack digital voting application built for secure, transparent, and user-friendly election management. The project includes a React frontend, an Express API, and MongoDB data storage, with voter verification, election management, vote casting, live results, and audit logging.
 
-## Live Demo
+## Overview
 
-- Frontend: https://voteng-beta.vercel.app
-- Backend API: https://voteng-server.onrender.com/
+This project is designed to support a simple election workflow for registered voters and administrators:
+
+- Voters register and verify their accounts with an OTP code
+- Only verified users can vote
+- Elections are created and managed by an admin
+- Each voter can vote once per election
+- Results update as votes are submitted
+- Election data is protected with a hash-based blockchain-style verification layer
 
 ## Features
 
-### Voter Features
-- NIN and voter card validation during registration
-- Email OTP verification
-- Secure JWT-based login
-- Election listing and status tracking
+### Voter features
+- User registration with validation for NIN and voter card number
+- Email-based OT P verification for account activation
+- Secure login with JWT authentication
+- Election list with status labels such as upcoming, active, and closed
 - Candidate selection by position
 - One-vote-per-election enforcement
-- Results viewing after voting
-- Vote status tracking
+- Results view for each election
+- Vote status check for each voter
 
-### Admin Features
-- Admin-only dashboard
-- Election creation and management
-- Candidate management
-- Voter verification overview
-- Audit log tracking
-- Summary statistics for voters, elections, and votes
+### Admin features
+- Secure admin-only dashboard
+- Election creation, activation, and closure
+- Candidate management for each election
+- Voter overview with verification status
+- Audit log tracking for important actions
+- Dashboard statistics for total voters, elections, active elections, and votes cast
 
-### Security
-- bcrypt password hashing
-- JWT-protected routes
-- Verified voter requirement before voting
-- Rate limiting for authentication and voting actions
-- Hash-chain validation for vote integrity
+### Security and integrity
+- Password hashing with bcrypt
+- JWT-based protected routes
+- Verified account requirement before voting
+- Rate limiting on authentication and voting actions
+- Hash-chain integrity checks for vote records
+- Audit trails for registrations, logins, votes, and election changes
 
-## Tech Stack
+## Technology Stack
 
 ### Frontend
 - React
 - Vite
 - React Router
 - Axios
+- Recharts
 - React Toastify
 
 ### Backend
 - Node.js
 - Express.js
 - MongoDB with Mongoose
-- JWT
-- Helmet
-- CORS
-- Express Rate Limit
+- JWT for authentication
+- Helmet and CORS for security
+- Express rate limiting
+- Socket.IO (server-side real-time support)
 
-### Additional Tools
-- Nodemailer / Brevo for OTP email delivery
-- bcrypt for hashing
-- crypto-based vote verification
+### Additional services and utilities
+- Nodemailer / Brevo email delivery for OTP messages
+- bcrypt for password hashing
+- crypto-based hash verification for vote integrity
 
 ## Project Structure
 
@@ -74,16 +82,35 @@ voting-system/
 │   ├── utils/
 │   ├── package.json
 │   └── server.js
-├── README.md
-└── .git/
+├── .git/
+└── README.md
 ```
+
+## Screenshots
+
+This project does not currently include screenshots in the repository. To add them later, create a folder such as `docs/screenshots/` or `assets/screenshots/` and save images there.
+
+Example:
+
+```text
+docs/
+└── screenshots/
+    ├── home-page.png
+    ├── election-list.png
+    ├── vote-page.png
+    └── admin-dashboard.png
+```
+
+Then 
 
 ## Prerequisites
 
-- Node.js
-- npm
+Before running the project locally, make sure you have:
+
+- Node.js installed
+- npm installed
 - MongoDB running locally or a MongoDB Atlas connection string
-- Browser
+- A browser for the frontend
 
 ## Installation
 
@@ -110,7 +137,7 @@ npm install
 
 ## Environment Variables
 
-Create a `.env` file in the `server` folder:
+Create a `.env` file in the `server` folder with the variables below. Use placeholder values only.
 
 ```env
 PORT=5000
@@ -123,14 +150,13 @@ BREVO_API_KEY=your_brevo_api_key
 EMAIL_USER=your_verified_email_address
 ```
 
-### Notes
+Notes:
 - `MONGO_URI` is required for database connectivity.
-- `JWT_SECRET` should be a strong random value.
-- `BREVO_API_KEY` and `EMAIL_USER` are used for production email delivery.
-- In development, OTP codes are printed in the terminal instead of email.
-- The frontend uses `VITE_API_URL` when set; otherwise it defaults to `http://localhost:5000/api`.
+- `JWT_SECRET` should be a long random secret string.
+- `BREVO_API_KEY` and `EMAIL_USER` are used for production email delivery. In development mode, the OTP code is printed in the terminal instead of being emailed.
+- The frontend uses `VITE_API_URL` if present; otherwise it defaults to `http://localhost:5000/api`.
 
-## Run Locally
+## Running the Project Locally
 
 ### Start the backend
 
@@ -139,7 +165,7 @@ cd server
 npm run dev
 ```
 
-Backend URL:
+The backend API will run on:
 
 ```text
 http://localhost:5000
@@ -147,34 +173,44 @@ http://localhost:5000
 
 ### Start the frontend
 
+Open a separate terminal and run:
+
 ```bash
 cd client
 npm run dev
 ```
 
-Frontend URL:
+The frontend development server usually runs on:
 
 ```text
 http://localhost:5173
 ```
 
-## Demo Accounts
+## Default Demo Accounts
+
+This project includes seed data for quick testing. The seed script is defined in the backend and can be run with:
 
 ```bash
 cd server
 npm run seed
 ```
 
-### Default accounts
+The generated sample accounts are defined in the code and include:
+
 - Admin email: `admin@voteng.gov.ng`
 - Admin password: `Admin1234`
 - Voter email: `emeka@email.com`
 - Voter password: `Voter1234`
 
-> These are example values and should be changed in production.
+> These are example values from the repository and should be changed or removed in production.
+
+## Live Demo
+
+- Frontend: https://voteng-beta.vercel.app
+- Backend API: https://voteng-server.onrender.com/
 
 ## Notes
 
-- This is a student/demo voting system and should be reviewed before production deployment.
+- The project is a student or prototype voting system and should be reviewed carefully before production deployment.
 - For production use, add stronger validation, secure hosting, and deployment hardening.
-- The backend supports OTP verification and audit logging for demonstration and internal use.
+- The backend currently supports OTP-based verification and an audit log approach suitable for a demo or internal project.
